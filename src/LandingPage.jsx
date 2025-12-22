@@ -11,13 +11,11 @@ import {
   ChevronRight,
   Menu,
   X,
-  ChevronUp,
   ChevronLeft
 } from 'lucide-react'
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [showScrollTop, setShowScrollTop] = useState(false)
   const [videoError, setVideoError] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [currentModel, setCurrentModel] = useState(null)
@@ -27,19 +25,6 @@ const LandingPage = () => {
     whatsapp: '',
     modelo: ''
   })
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 500) {
-        setShowScrollTop(true)
-      } else {
-        setShowScrollTop(false)
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -199,8 +184,15 @@ const LandingPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     const mensaje = `Hola Alex, soy ${formData.nombre}. Estoy interesado en el ${formData.modelo}. Mi WhatsApp: ${formData.whatsapp}`
-    const whatsappUrl = `https://wa.me/5255452299987?text=${encodeURIComponent(mensaje)}`
+    const whatsappUrl = `https://wa.me/525545229987?text=${encodeURIComponent(mensaje)}`
     window.open(whatsappUrl, '_blank')
+    
+    // Limpiar formulario después de enviar
+    setFormData({
+      nombre: '',
+      whatsapp: '',
+      modelo: ''
+    })
   }
 
   return (
@@ -214,9 +206,13 @@ const LandingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-24">
             <div className="flex items-center gap-3">
-              <div className="font-serif text-3xl md:text-4xl font-bold tracking-tight">
-                Alex Rosete <span className="text-[#C0C0C0]">| Mercedes-Benz</span>
-              </div>
+              <button 
+                onClick={scrollToTop}
+                className="font-serif text-3xl md:text-4xl font-bold tracking-tight transition-colors cursor-pointer group"
+              >
+                <span className="text-white group-hover:text-[#C0C0C0] transition-colors">Alex Rosete</span>
+                <span className="text-[#C0C0C0] group-hover:text-white transition-colors"> | Mercedes-Benz</span>
+              </button>
               {/* Mercedes-Benz Logo */}
               <img 
                 src="/Logo MBZ.png" 
@@ -230,15 +226,6 @@ const LandingPage = () => {
               <a href="#modelos" className="text-lg hover:text-[#C0C0C0] transition-colors">Modelos</a>
               <a href="#servicios" className="text-lg hover:text-[#C0C0C0] transition-colors">Servicios</a>
               <a href="#contacto" className="text-lg hover:text-[#C0C0C0] transition-colors">Contacto</a>
-              <a 
-                href="https://wa.me/5255452299987" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[#C0C0C0] hover:bg-white text-black px-6 py-3 rounded-full transition-colors text-lg font-medium"
-              >
-                <Phone className="w-5 h-5" />
-                WhatsApp
-              </a>
             </div>
 
             {/* Mobile Menu Button */}
@@ -300,7 +287,16 @@ const LandingPage = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.2 }}
-            className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+            whileHover={{ 
+              scale: 1.05,
+              y: -8,
+              textShadow: "0 0 30px rgba(192, 192, 192, 0.8), 0 0 60px rgba(255, 255, 255, 0.5)",
+              transition: { duration: 0.3, ease: "easeOut" }
+            }}
+            className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight cursor-pointer"
+            style={{
+              textShadow: "0 0 0px transparent"
+            }}
           >
             Alex Rosete
           </motion.h1>
@@ -383,7 +379,7 @@ const LandingPage = () => {
                   variants={fadeInUp}
                   className={`${estilos[index]} p-8 rounded-2xl transition-all duration-300 group`}
                 >
-                  <div className="text-[#C0C0C0] mb-6 group-hover:text-white transition-colors">
+                  <div className="text-[#C0C0C0] mb-6 group-hover:text-white transition-colors drop-shadow-[0_0_10px_rgba(192,192,192,0.6)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
                     {servicio.icon}
                   </div>
                   <h3 className="font-serif text-2xl font-bold mb-4">{servicio.titulo}</h3>
@@ -421,10 +417,12 @@ const LandingPage = () => {
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                onClick={() => openModal(modelo)}
-                className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500 cursor-pointer"
+                className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500"
               >
-                <div className="relative h-64 overflow-hidden">
+                <div 
+                  className="relative h-64 overflow-hidden cursor-pointer"
+                  onClick={() => openModal(modelo)}
+                >
                   <img 
                     src={modelo.imagen} 
                     alt={modelo.nombre}
@@ -452,7 +450,7 @@ const LandingPage = () => {
                   </div>
                   <a
                     href="#contacto"
-                    className="w-full block text-center glass py-3 rounded-lg hover:bg-white/10 transition-colors"
+                    className="w-full block text-center glass py-3 rounded-lg hover:bg-white/10 transition-colors font-medium"
                   >
                     Solicitar Información
                   </a>
@@ -489,15 +487,43 @@ const LandingPage = () => {
               <motion.div
                 key={index}
                 variants={fadeInUp}
-                onClick={() => openModal(vehiculo)}
-                className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500 cursor-pointer"
+                className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500"
               >
-                <div className="relative h-64 overflow-hidden">
+                <div 
+                  className="relative h-64 overflow-hidden cursor-pointer"
+                  onClick={() => openModal(vehiculo)}
+                >
                   <img 
                     src={vehiculo.imagen} 
                     alt={vehiculo.nombre}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+                  
+                  {/* Badge de Promoción - Solo para S 500 */}
+                  {vehiculo.nombre === "Mercedes-Benz S 500" && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className="relative">
+                        {/* Badge principal con glassmorphism */}
+                        <div 
+                          className="bg-gradient-to-br from-[#C0C0C0] to-white px-2 py-1 rounded-md border border-white shadow-xl"
+                          style={{
+                            backdropFilter: "blur(8px)",
+                            boxShadow: "0 0 15px rgba(192, 192, 192, 0.5), 0 0 30px rgba(255, 255, 255, 0.2)"
+                          }}
+                        >
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-[#0A0A0A] text-[#0A0A0A] animate-pulse" />
+                            <div className="text-center leading-none">
+                              <p className="text-[#0A0A0A] font-black text-sm">-15%</p>
+                            </div>
+                          </div>
+                        </div>
+                        {/* Efecto de brillo/pulsación */}
+                        <div className="absolute inset-0 rounded-md bg-white/20 animate-ping" style={{ animationDuration: "2s" }}></div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="absolute top-4 right-4 bg-[#C0C0C0] text-black px-4 py-2 rounded-full font-bold text-sm">
                     {vehiculo.año}
                   </div>
@@ -524,7 +550,7 @@ const LandingPage = () => {
                   </div>
                   <a
                     href="#contacto"
-                    className="w-full block text-center glass py-3 rounded-lg hover:bg-white/10 transition-colors"
+                    className="w-full block text-center glass py-3 rounded-lg hover:bg-white/10 transition-colors font-medium"
                   >
                     Solicitar Información
                   </a>
@@ -599,7 +625,7 @@ const LandingPage = () => {
                     ))}
                   </div>
                   <p className="text-gray-300 mb-6 italic leading-relaxed">
-                    "{testimonio.texto}"
+                    &ldquo;{testimonio.texto}&rdquo;
                   </p>
                   <div className="border-t border-white/20 pt-4 flex items-center gap-4">
                     {/* Cuadro redondeado para foto del usuario */}
@@ -634,13 +660,18 @@ const LandingPage = () => {
                 Una conversación privada sin compromisos para entender tus necesidades.
               </p>
               <div className="space-y-4">
-                <div className="flex items-center gap-4">
+                <a 
+                  href="https://wa.me/525545229987?text=Hola%20Alex,%20vi%20tu%20landing%20page%20y%20me%20gustaría%20recibir%20información%20sobre%20un%20Mercedes-Benz."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 hover:text-[#C0C0C0] transition-colors"
+                >
                   <Phone className="w-6 h-6 text-[#C0C0C0]" />
                   <span>+52 55 4522 9987</span>
-                </div>
+                </a>
                 <div className="flex items-center gap-4">
                   <Mail className="w-6 h-6 text-[#C0C0C0]" />
-                  <span>alex.rosete@mercedes-benz.com</span>
+                  <span>mbfpdc@prestigemotors.com.mx</span>
                 </div>
                 <div className="flex items-center gap-4">
                   <Clock className="w-6 h-6 text-[#C0C0C0]" />
@@ -709,7 +740,7 @@ const LandingPage = () => {
       <footer className="py-12 px-4 border-t border-white/10">
         <div className="max-w-7xl mx-auto text-center">
           <p className="font-serif text-2xl font-bold mb-2">Alex Rosete</p>
-          <p className="text-[#C0C0C0] mb-4">Asesor Senior de Ventas | Mercedes-Benz</p>
+          <p className="text-[#C0C0C0] mb-4">Gerente de Financiera | Mercedes-Benz</p>
           <p className="text-sm text-gray-500 italic">
             Cancún & Riviera Maya | © {new Date().getFullYear()} Todos los derechos reservados
           </p>
@@ -835,38 +866,41 @@ const LandingPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Floating WhatsApp Button */}
+      {/* Floating WhatsApp Button - Premium Glassmorphism */}
       <motion.a
-        href="https://wa.me/5255452299987"
+        href="https://wa.me/525545229987?text=Hola%20Alex,%20vi%20tu%20landing%20page%20y%20me%20gustaría%20recibir%20información%20sobre%20un%20Mercedes-Benz."
         target="_blank"
         rel="noopener noreferrer"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1, type: "spring" }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="fixed bottom-8 right-8 bg-[#C0C0C0] hover:bg-white p-4 rounded-full shadow-2xl z-50 transition-colors"
+        initial={{ scale: 0, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ 
+          delay: 1, 
+          duration: 0.4,
+          type: "spring",
+          stiffness: 260,
+          damping: 20
+        }}
+        whileHover={{ 
+          scale: 1.15,
+          boxShadow: "0 0 30px rgba(255, 255, 255, 0.6), 0 0 60px rgba(192, 192, 192, 0.4)",
+          transition: { duration: 0.15 }
+        }}
+        whileTap={{ 
+          scale: 0.95,
+          transition: { duration: 0.05 }
+        }}
+        className="fixed bottom-8 right-8 z-50 p-5 rounded-full group"
+        style={{
+          background: "linear-gradient(135deg, rgba(192, 192, 192, 0.4), rgba(255, 255, 255, 0.2))",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          border: "1px solid rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(192, 192, 192, 0.3)"
+        }}
       >
-        <Phone className="w-6 h-6 text-black" />
+        <Phone className="w-7 h-7 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]" />
       </motion.a>
 
-      {/* Scroll to Top Button */}
-      <AnimatePresence>
-        {showScrollTop && (
-          <motion.button
-            onClick={scrollToTop}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            whileHover={{ scale: 1.1, y: -5 }}
-            whileTap={{ scale: 0.9 }}
-            className="fixed bottom-8 left-8 bg-[#C0C0C0] hover:bg-white p-4 rounded-full shadow-2xl z-50 transition-all border-2 border-white/50"
-            style={{ boxShadow: '0 8px 32px rgba(192, 192, 192, 0.4)' }}
-          >
-            <ChevronUp className="w-6 h-6 text-black" />
-          </motion.button>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
