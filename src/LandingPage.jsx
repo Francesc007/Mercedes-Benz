@@ -59,16 +59,37 @@ const LandingPage = () => {
     }
   }
 
-  // Cerrar modal con tecla Escape
+  // Navegación con teclado (Escape, flechas izquierda/derecha)
   useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === 'Escape' && modalOpen) {
-        closeModal()
+    if (!modalOpen) return
+
+    const handleKeyboard = (e) => {
+      switch(e.key) {
+        case 'Escape':
+          setModalOpen(false)
+          setCurrentModel(null)
+          setCurrentImageIndex(0)
+          document.body.style.overflow = 'unset'
+          break
+        case 'ArrowLeft':
+          e.preventDefault()
+          if (currentImageIndex > 0) {
+            setCurrentImageIndex(currentImageIndex - 1)
+          }
+          break
+        case 'ArrowRight':
+          e.preventDefault()
+          if (currentModel && currentImageIndex < currentModel.imagenes.length - 1) {
+            setCurrentImageIndex(currentImageIndex + 1)
+          }
+          break
+        default:
+          break
       }
     }
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [modalOpen])
+    window.addEventListener('keydown', handleKeyboard)
+    return () => window.removeEventListener('keydown', handleKeyboard)
+  }, [modalOpen, currentImageIndex, currentModel])
 
   const fadeInUp = {
     initial: { opacity: 0, y: 60 },
@@ -97,7 +118,7 @@ const LandingPage = () => {
     {
       nombre: "Mercedes-AMG GT",
       imagen: "/AMG GT.jpg",
-      imagenes: ["/AMG GT.jpg"], // Puedes agregar más imágenes aquí
+      imagenes: ["/AMG GT.jpg", "/Amg gt 1.webp"],
       aceleracion: "3.2s",
       potencia: "630 HP",
       motor: "V8 Biturbo"
@@ -256,26 +277,29 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Video/Image Background */}
+        {/* Video Background */}
         <div className="absolute inset-0">
-          {!videoError ? (
-            <video 
-              autoPlay 
-              loop 
-              muted 
-              playsInline
-              onError={() => setVideoError(true)}
-              className="w-full h-full object-cover"
-              poster="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1920&q=80"
-            >
-              <source src="https://player.vimeo.com/external/371433846.hd.mp4?s=1f686d03f47c9f88b1d06f8c8f88c5c7e8a13c5e&profile_id=175" type="video/mp4" />
-              <source src="https://cdn.coverr.co/videos/coverr-black-mercedes-benz-car-3735/1080p.mp4" type="video/mp4" />
-            </video>
-          ) : (
+          <video 
+            autoPlay 
+            loop 
+            muted 
+            playsInline
+            preload="auto"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.log('Error cargando video GT.mp4:', e);
+              setVideoError(true);
+            }}
+            onLoadedData={() => console.log('Video GT.mp4 cargado exitosamente')}
+          >
+            <source src="/GT.mp4" type="video/mp4" />
+            Su navegador no soporta video HTML5.
+          </video>
+          {videoError && (
             <img 
-              src="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1920&q=80"
-              alt="Mercedes AMG"
-              className="w-full h-full object-cover"
+              src="/AMG GT.jpg"
+              alt="Mercedes-Benz"
+              className="absolute inset-0 w-full h-full object-cover"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/45 to-black/50"></div>

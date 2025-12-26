@@ -67,3 +67,5 @@ mercedes-benz-rosete/
 
 Puedes personalizar los estilos de Tailwind CSS editando el archivo `tailwind.config.js` y añadiendo tus propios componentes en la carpeta `src/`.
 
+
+
