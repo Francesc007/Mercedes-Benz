@@ -35,25 +35,25 @@ const LandingPage = () => {
       try {
         const carsQuery = `*[_type == "car"] {
           _id,
-          brand,
-          model,
-          year,
-          price,
-          mileage,
-          acceleration,
-          power,
-          engine,
-          isNew,
-          mainImage,
-          "gallery": gallery[].asset->url
+          Marca,
+          Modelo,
+          Anio,
+          Precio,
+          Kilometraje,
+          Aceleracion,
+          Potencia,
+          Motor,
+          EsNuevo,
+          FotoPortada,
+          "Galeria": Galeria[].asset->url
         }`
         const deliveriesQuery = `*[_type == "delivery"] {
           _id,
-          customerName,
-          location,
-          carModel,
-          customerImage,
-          description
+          NombreCliente,
+          Ubicacion,
+          ModeloAuto,
+          FotoCliente,
+          Descripcion
         }`
         
         const [carsData, deliveriesData] = await Promise.all([
@@ -76,29 +76,29 @@ const LandingPage = () => {
     fetchData()
   }, [])
 
-  const modelos = cars.filter(car => car.isNew).map(car => ({
-    nombre: `${car.brand} ${car.model}`,
-    imagen: car.mainImage ? urlFor(car.mainImage).url() : '',
+  const modelos = cars.filter(car => car.EsNuevo).map(car => ({
+    nombre: `${car.Marca} ${car.Modelo}`,
+    imagen: car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
     imagenes: [
-      car.mainImage ? urlFor(car.mainImage).url() : '',
-      ...(car.gallery || [])
+      car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
+      ...(car.Galeria || [])
     ].filter(Boolean),
-    aceleracion: car.acceleration || "N/D",
-    potencia: car.power || "N/D",
-    motor: car.engine || "N/D"
+    aceleracion: car.Aceleracion || "N/D",
+    potencia: car.Potencia || "N/D",
+    motor: car.Motor || "N/D"
   }))
 
-  const seminuevos = cars.filter(car => !car.isNew).map(car => ({
-    nombre: `${car.brand} ${car.model}`,
-    año: car.year?.toString() || "N/D",
-    imagen: car.mainImage ? urlFor(car.mainImage).url() : '',
+  const seminuevos = cars.filter(car => !car.EsNuevo).map(car => ({
+    nombre: `${car.Marca} ${car.Modelo}`,
+    año: car.Anio?.toString() || "N/D",
+    imagen: car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
     imagenes: [
-      car.mainImage ? urlFor(car.mainImage).url() : '',
-      ...(car.gallery || [])
+      car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
+      ...(car.Galeria || [])
     ].filter(Boolean),
-    kilometraje: car.mileage ? `${car.mileage.toLocaleString()} km` : "0 km",
-    precio: car.price ? `$${car.price.toLocaleString()}` : "Consultar",
-    motor: car.engine || "N/D"
+    kilometraje: car.Kilometraje ? `${car.Kilometraje.toLocaleString()} km` : "0 km",
+    precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
+    motor: car.Motor || "N/D"
   }))
 
   const scrollToTop = () => {
@@ -182,11 +182,11 @@ const LandingPage = () => {
   }
 
   const testimonios = deliveries.map(delivery => ({
-    nombre: delivery.customerName,
-    ubicacion: delivery.location || "Riviera Maya",
-    texto: delivery.description,
-    modelo: delivery.carModel || "Mercedes-Benz",
-    imagen: delivery.customerImage ? urlFor(delivery.customerImage).url() : null
+    nombre: delivery.NombreCliente,
+    ubicacion: delivery.Ubicacion || "Riviera Maya",
+    texto: delivery.Descripcion,
+    modelo: delivery.ModeloAuto || "Mercedes-Benz",
+    imagen: delivery.FotoCliente ? urlFor(delivery.FotoCliente).url() : null
   }))
 
   const servicios = [
@@ -301,12 +301,12 @@ const LandingPage = () => {
             preload="auto"
             className="w-full h-full object-cover"
             onError={(e) => {
-              console.log('Error cargando video GT.mp4:', e);
+              console.log('Error cargando video MB.mp4:', e);
               setVideoError(true);
             }}
-            onLoadedData={() => console.log('Video GT.mp4 cargado exitosamente')}
+            onLoadedData={() => console.log('Video MB.mp4 cargado exitosamente')}
           >
-            <source src="/GT.mp4" type="video/mp4" />
+            <source src="/MB.mp4" type="video/mp4" />
             Su navegador no soporta video HTML5.
           </video>
           {videoError && (
@@ -763,8 +763,8 @@ const LandingPage = () => {
                   >
                     <option value="" className="bg-white text-black">Selecciona un modelo</option>
                     {cars.map(car => (
-                      <option key={car._id} value={`${car.brand} ${car.model}`} className="bg-white text-black">
-                        {car.brand} {car.model}
+                      <option key={car._id} value={`${car.Marca} ${car.Modelo}`} className="bg-white text-black">
+                        {car.Marca} {car.Modelo}
                       </option>
                     ))}
                     <option value="Otro modelo" className="bg-white text-black">Otro modelo</option>
