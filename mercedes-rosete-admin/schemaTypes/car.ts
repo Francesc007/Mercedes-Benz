@@ -30,6 +30,12 @@ export default defineType({
       validation: (Rule) => Rule.required().min(0),
     }),
     defineField({
+      name: 'Descuento',
+      title: 'Porcentaje de Descuento',
+      type: 'number',
+      validation: (Rule) => Rule.min(0).max(100),
+    }),
+    defineField({
       name: 'Kilometraje',
       title: 'Kilometraje',
       type: 'number',

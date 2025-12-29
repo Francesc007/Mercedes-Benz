@@ -44,6 +44,7 @@ const LandingPage = () => {
           Potencia,
           Motor,
           EsNuevo,
+          Descuento,
           FotoPortada,
           "Galeria": Galeria[].asset->url
         }`
@@ -85,7 +86,8 @@ const LandingPage = () => {
     ].filter(Boolean),
     aceleracion: car.Aceleracion || "N/D",
     potencia: car.Potencia || "N/D",
-    motor: car.Motor || "N/D"
+    motor: car.Motor || "N/D",
+    descuento: car.Descuento
   }))
 
   const seminuevos = cars.filter(car => !car.EsNuevo).map(car => ({
@@ -98,7 +100,8 @@ const LandingPage = () => {
     ].filter(Boolean),
     kilometraje: car.Kilometraje ? `${car.Kilometraje.toLocaleString()} km` : "0 km",
     precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
-    motor: car.Motor || "N/D"
+    motor: car.Motor || "N/D",
+    descuento: car.Descuento
   }))
 
   const scrollToTop = () => {
@@ -466,6 +469,29 @@ const LandingPage = () => {
                     alt={modelo.nombre}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+                  
+                  {/* Badge de Descuento Dinámico */}
+                  {modelo.descuento > 0 && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className="relative">
+                        <div 
+                          className="bg-gradient-to-br from-[#C0C0C0] to-white px-2 py-1 rounded-md border border-white shadow-xl"
+                          style={{
+                            backdropFilter: "blur(8px)",
+                            boxShadow: "0 0 15px rgba(192, 192, 192, 0.5), 0 0 30px rgba(255, 255, 255, 0.2)"
+                          }}
+                        >
+                          <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-[#0A0A0A] text-[#0A0A0A] animate-pulse" />
+                            <div className="text-center leading-none">
+                              <p className="text-[#0A0A0A] font-black text-sm">-{modelo.descuento}%</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 rounded-md bg-white/20 animate-ping" style={{ animationDuration: "2s" }}></div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h3 className="font-serif text-2xl font-bold mb-6">{modelo.nombre}</h3>
@@ -537,11 +563,10 @@ const LandingPage = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   
-                  {/* Badge de Promoción - Solo para S 500 */}
-                  {vehiculo.nombre === "Mercedes-Benz S 500" && (
+                  {/* Badge de Descuento Dinámico */}
+                  {vehiculo.descuento > 0 && (
                     <div className="absolute top-4 left-4 z-10">
                       <div className="relative">
-                        {/* Badge principal con glassmorphism */}
                         <div 
                           className="bg-gradient-to-br from-[#C0C0C0] to-white px-2 py-1 rounded-md border border-white shadow-xl"
                           style={{
@@ -552,11 +577,10 @@ const LandingPage = () => {
                           <div className="flex items-center gap-1">
                             <Star className="w-3 h-3 fill-[#0A0A0A] text-[#0A0A0A] animate-pulse" />
                             <div className="text-center leading-none">
-                              <p className="text-[#0A0A0A] font-black text-sm">-15%</p>
+                              <p className="text-[#0A0A0A] font-black text-sm">-{vehiculo.descuento}%</p>
                             </div>
                           </div>
                         </div>
-                        {/* Efecto de brillo/pulsación */}
                         <div className="absolute inset-0 rounded-md bg-white/20 animate-ping" style={{ animationDuration: "2s" }}></div>
                       </div>
                     </div>
