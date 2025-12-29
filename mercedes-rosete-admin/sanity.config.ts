@@ -5,7 +5,7 @@ import {schemaTypes} from './schemaTypes'
 
 export default defineConfig({
   name: 'default',
-  title: 'mercedes-rosete-admin',
+  title: 'Mercedes-Benz Admin',
 
   projectId: 'nfhji1ic',
   dataset: 'production',
