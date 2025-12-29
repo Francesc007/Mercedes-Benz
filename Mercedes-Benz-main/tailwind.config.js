@@ -11,8 +11,8 @@ export default {
         silver: '#C0C0C0',
       },
       fontFamily: {
-        serif: ['Cormorant Garamond', 'serif'],
-        sans: ['Inter', 'sans-serif'],
+        serif: ['Corporate A BQ Light', 'Cormorant Garamond', 'serif'],
+        sans: ['Corporate A BQ Light', 'Inter', 'sans-serif'],
       },
       backdropBlur: {
         xs: '2px',

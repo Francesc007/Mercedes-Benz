@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@font-face {
+  font-family: 'Corporate A BQ Light';
+  src: url('/fonts/Corporate-A-BQ-Light.woff2') format('woff2'),
+       url('/fonts/Corporate-A-BQ-Light.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -19,7 +26,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Corporate A BQ Light', 'Inter', sans-serif;
   background-color: var(--obsidian-black);
   color: var(--pure-white);
   overflow-x: hidden;
@@ -33,11 +40,11 @@ body {
 }
 
 .font-serif {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Corporate A BQ Light', 'Cormorant Garamond', serif;
 }
 
 .font-sans {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Corporate A BQ Light', 'Inter', sans-serif;
 }
 
 /* Glassmorphism Effect */

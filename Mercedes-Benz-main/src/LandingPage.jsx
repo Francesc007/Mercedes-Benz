@@ -29,6 +29,7 @@ const LandingPage = () => {
   const [cars, setCars] = useState([])
   const [deliveries, setDeliveries] = useState([])
   const [loading, setLoading] = useState(true)
+  const [currentTestimonioIndex, setCurrentTestimonioIndex] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,7 +88,12 @@ const LandingPage = () => {
     aceleracion: car.Aceleracion || "N/D",
     potencia: car.Potencia || "N/D",
     motor: car.Motor || "N/D",
-    descuento: car.Descuento
+    descuento: car.Descuento,
+    precioRaw: car.Precio,
+    precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
+    precioConDescuento: car.Precio && car.Descuento > 0 
+      ? `$${(car.Precio * (1 - car.Descuento / 100)).toLocaleString()}` 
+      : null
   }))
 
   const seminuevos = cars.filter(car => !car.EsNuevo).map(car => ({
@@ -99,10 +105,32 @@ const LandingPage = () => {
       ...(car.Galeria || [])
     ].filter(Boolean),
     kilometraje: car.Kilometraje ? `${car.Kilometraje.toLocaleString()} km` : "0 km",
+    precioRaw: car.Precio,
     precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
+    precioConDescuento: car.Precio && car.Descuento > 0 
+      ? `$${(car.Precio * (1 - car.Descuento / 100)).toLocaleString()}` 
+      : null,
     motor: car.Motor || "N/D",
     descuento: car.Descuento
   }))
+
+  const testimonios = deliveries.map(delivery => ({
+    nombre: delivery.NombreCliente,
+    ubicacion: delivery.Ubicacion || "Riviera Maya",
+    texto: delivery.Descripcion,
+    modelo: delivery.ModeloAuto || "Mercedes-Benz",
+    imagen: delivery.FotoCliente ? urlFor(delivery.FotoCliente).url() : null
+  }))
+
+  // Efecto para el carrusel de testimonios (6 segundos)
+  useEffect(() => {
+    if (testimonios.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentTestimonioIndex((prev) => (prev + 1) % testimonios.length)
+      }, 6000)
+      return () => clearInterval(interval)
+    }
+  }, [testimonios.length])
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -183,14 +211,6 @@ const LandingPage = () => {
       }
     }
   }
-
-  const testimonios = deliveries.map(delivery => ({
-    nombre: delivery.NombreCliente,
-    ubicacion: delivery.Ubicacion || "Riviera Maya",
-    texto: delivery.Descripcion,
-    modelo: delivery.ModeloAuto || "Mercedes-Benz",
-    imagen: delivery.FotoCliente ? urlFor(delivery.FotoCliente).url() : null
-  }))
 
   const servicios = [
     {
@@ -418,7 +438,7 @@ const LandingPage = () => {
                 <motion.div
                   key={index}
                   variants={fadeInUp}
-                  className={`${estilos[index]} p-8 rounded-2xl transition-all duration-300 group`}
+                  className={`${estilos[index % 3]} p-8 rounded-2xl transition-all duration-300 group`}
                 >
                   <div className="text-[#C0C0C0] mb-6 group-hover:text-white transition-colors drop-shadow-[0_0_10px_rgba(192,192,192,0.6)] group-hover:drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]">
                     {servicio.icon}
@@ -472,7 +492,7 @@ const LandingPage = () => {
                   
                   {/* Badge de Descuento Dinámico */}
                   {modelo.descuento > 0 && (
-                    <div className="absolute top-4 left-4 z-10">
+                    <div className="absolute top-4 right-4 z-10">
                       <div className="relative">
                         <div 
                           className="bg-gradient-to-br from-[#C0C0C0] to-white px-2 py-1 rounded-md border border-white shadow-xl"
@@ -512,6 +532,28 @@ const LandingPage = () => {
                       <p className="font-bold text-xs">{modelo.motor}</p>
                     </div>
                   </div>
+
+                  {/* Precio Dinámico */}
+                  <div className="mb-6 pt-4 border-t border-white/10 flex justify-between items-center">
+                    <span className="text-gray-400 text-sm">Inversión</span>
+                    <div className="text-right">
+                      {modelo.descuento > 0 ? (
+                        <div className="flex flex-col">
+                          <span className="text-gray-500 text-xs line-through decoration-red-500/50">
+                            {modelo.precio}
+                          </span>
+                          <span className="font-bold text-white text-xl">
+                            {modelo.precioConDescuento}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="font-bold text-white text-lg">
+                          {modelo.precio}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
                   <a
                     href="#contacto"
                     className="w-full block text-center glass py-3 rounded-lg hover:bg-white/10 transition-colors font-medium"
@@ -565,7 +607,7 @@ const LandingPage = () => {
                   
                   {/* Badge de Descuento Dinámico */}
                   {vehiculo.descuento > 0 && (
-                    <div className="absolute top-4 left-4 z-10">
+                    <div className="absolute top-4 right-4 z-10">
                       <div className="relative">
                         <div 
                           className="bg-gradient-to-br from-[#C0C0C0] to-white px-2 py-1 rounded-md border border-white shadow-xl"
@@ -585,10 +627,6 @@ const LandingPage = () => {
                       </div>
                     </div>
                   )}
-                  
-                  <div className="absolute top-4 right-4 bg-[#C0C0C0] text-black px-4 py-2 rounded-full font-bold text-sm">
-                    {vehiculo.año}
-                  </div>
                 </div>
                 <div className="p-6">
                   <h3 className="font-serif text-2xl font-bold mb-6">{vehiculo.nombre}</h3>
@@ -607,7 +645,22 @@ const LandingPage = () => {
                     </div>
                     <div className="flex justify-between items-center pt-2">
                       <span className="text-gray-400">Precio</span>
-                      <span className="font-bold text-[#C0C0C0] text-lg">{vehiculo.precio}</span>
+                      <div className="text-right">
+                        {vehiculo.descuento > 0 ? (
+                          <div className="flex flex-col">
+                            <span className="text-gray-500 text-sm line-through decoration-red-500/50">
+                              {vehiculo.precio}
+                            </span>
+                            <span className="font-bold text-[#C0C0C0] text-xl">
+                              {vehiculo.precioConDescuento}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-[#C0C0C0] text-lg">
+                            {vehiculo.precio}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <a
@@ -654,31 +707,22 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <motion.div 
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="whileInView"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-3 gap-8"
-          >
-            {testimonios.map((testimonio, index) => {
-              // Diferentes estilos para cada testimonio
-              const estilos = [
-                // Testimonio 1: Borde plateado con fondo oscuro
-                "bg-white/5 border-2 border-[#C0C0C0]/60 hover:bg-white/10 hover:border-[#C0C0C0] transition-all duration-300",
-                // Testimonio 2: Fondo plateado suave
-                "bg-[#C0C0C0]/10 border-2 border-white/30 hover:bg-[#C0C0C0]/15 hover:border-white/50 transition-all duration-300",
-                // Testimonio 3: Degradado con acento
-                "bg-white/5 border-2 border-[#C0C0C0]/50 hover:bg-white/10 hover:border-white/60 transition-all duration-300"
-              ]
-              
-              return (
+          <div className="relative max-w-4xl mx-auto">
+            <AnimatePresence mode="wait">
+              {testimonios.length > 0 && (
                 <motion.div
-                  key={index}
-                  variants={fadeInUp}
-                  className={`${estilos[index]} p-8 rounded-2xl`}
+                  key={currentTestimonioIndex}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className={`${[
+                    "bg-white/5 border-2 border-[#C0C0C0]/60",
+                    "bg-[#C0C0C0]/10 border-2 border-white/30",
+                    "bg-white/5 border-2 border-[#C0C0C0]/50"
+                  ][currentTestimonioIndex % 3]} p-8 md:p-12 rounded-2xl shadow-2xl`}
                 >
-                  <div className="flex gap-1 mb-6">
+                  <div className="flex gap-1 mb-8 justify-center">
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
@@ -686,34 +730,54 @@ const LandingPage = () => {
                       />
                     ))}
                   </div>
-                  <p className="text-gray-300 mb-6 italic leading-relaxed">
-                    &ldquo;{testimonio.texto}&rdquo;
+                  
+                  <p className="text-xl md:text-2xl text-gray-200 mb-10 italic leading-relaxed text-center font-light">
+                    &ldquo;{testimonios[currentTestimonioIndex].texto}&rdquo;
                   </p>
-                  <div className="border-t border-white/20 pt-4 flex items-center gap-4">
-                    {/* Cuadro redondeado para foto del usuario */}
-                    {testimonio.imagen ? (
+                  
+                  <div className="flex flex-col md:flex-row items-center justify-center gap-6 border-t border-white/10 pt-8">
+                    {/* Foto del usuario */}
+                    {testimonios[currentTestimonioIndex].imagen ? (
                       <img 
-                        src={testimonio.imagen} 
-                        alt={testimonio.nombre}
-                        className="w-20 h-20 rounded-xl object-cover border-2 border-white/40 shadow-lg"
+                        src={testimonios[currentTestimonioIndex].imagen} 
+                        alt={testimonios[currentTestimonioIndex].nombre}
+                        className="w-24 h-24 rounded-2xl object-cover border-2 border-white/40 shadow-xl"
                       />
                     ) : (
-                      <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-[#C0C0C0] to-white/30 flex items-center justify-center text-black font-bold text-2xl flex-shrink-0 border-2 border-white/40">
-                        {testimonio.nombre.charAt(0)}
+                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#C0C0C0] to-white/30 flex items-center justify-center text-black font-bold text-3xl flex-shrink-0 border-2 border-white/40">
+                        {testimonios[currentTestimonioIndex].nombre.charAt(0)}
                       </div>
                     )}
-                    <div className="flex-1">
-                      <p className="font-bold text-white">{testimonio.nombre}</p>
-                      <p className="text-sm text-[#C0C0C0]">{testimonio.ubicacion}</p>
-                      <p className="text-sm text-white font-semibold mt-1 bg-white/10 inline-block px-3 py-1 rounded-full">
-                        {testimonio.modelo}
+                    
+                    <div className="text-center md:text-left">
+                      <p className="font-bold text-2xl text-white mb-1">{testimonios[currentTestimonioIndex].nombre}</p>
+                      <p className="text-[#C0C0C0] text-lg mb-2">{testimonios[currentTestimonioIndex].ubicacion}</p>
+                      <p className="text-sm text-white font-semibold bg-white/10 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5">
+                        {testimonios[currentTestimonioIndex].modelo}
                       </p>
                     </div>
                   </div>
                 </motion.div>
-              )
-            })}
-          </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Indicadores (Dots) */}
+            {testimonios.length > 1 && (
+              <div className="flex justify-center gap-3 mt-10">
+                {testimonios.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentTestimonioIndex(index)}
+                    className={`h-1.5 transition-all duration-500 rounded-full ${
+                      index === currentTestimonioIndex 
+                        ? 'w-12 bg-white' 
+                        : 'w-3 bg-white/20 hover:bg-white/40'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -960,7 +1024,7 @@ const LandingPage = () => {
           scale: 0.95,
           transition: { duration: 0.05 }
         }}
-        className="fixed bottom-8 right-8 z-50 p-5 rounded-full group"
+        className="fixed bottom-8 right-8 z-50 p-4 rounded-full group"
         style={{
           background: "linear-gradient(135deg, rgba(192, 192, 192, 0.4), rgba(255, 255, 255, 0.2))",
           backdropFilter: "blur(20px)",
@@ -969,7 +1033,7 @@ const LandingPage = () => {
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(192, 192, 192, 0.3)"
         }}
       >
-        <Phone className="w-7 h-7 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]" />
+        <Phone className="w-6 h-6 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]" />
       </motion.a>
 
     </div>
