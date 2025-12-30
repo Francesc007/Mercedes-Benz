@@ -722,39 +722,51 @@ const LandingPage = () => {
                     "bg-white/5 border-2 border-[#C0C0C0]/50"
                   ][currentTestimonioIndex % 3]} p-8 md:p-12 rounded-2xl shadow-2xl`}
                 >
-                  <div className="flex gap-1 mb-8 justify-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className="w-6 h-6 fill-[#C0C0C0] text-[#C0C0C0] drop-shadow-[0_0_8px_rgba(192,192,192,0.6)]"
-                      />
-                    ))}
-                  </div>
-                  
-                  <p className="text-xl md:text-2xl text-gray-200 mb-10 italic leading-relaxed text-center font-light">
-                    &ldquo;{testimonios[currentTestimonioIndex].texto}&rdquo;
-                  </p>
-                  
-                  <div className="flex flex-col md:flex-row items-center justify-center gap-6 border-t border-white/10 pt-8">
-                    {/* Foto del usuario */}
-                    {testimonios[currentTestimonioIndex].imagen ? (
-                      <img 
-                        src={testimonios[currentTestimonioIndex].imagen} 
-                        alt={testimonios[currentTestimonioIndex].nombre}
-                        className="w-24 h-24 rounded-2xl object-cover border-2 border-white/40 shadow-xl"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#C0C0C0] to-white/30 flex items-center justify-center text-black font-bold text-3xl flex-shrink-0 border-2 border-white/40">
-                        {testimonios[currentTestimonioIndex].nombre.charAt(0)}
+                  <div className="flex flex-col md:flex-row gap-8 items-center text-center md:text-left">
+                    {/* Izquierda: Foto del usuario */}
+                    <div className="flex-shrink-0">
+                      {testimonios[currentTestimonioIndex].imagen ? (
+                        <img 
+                          src={testimonios[currentTestimonioIndex].imagen} 
+                          alt={testimonios[currentTestimonioIndex].nombre}
+                          className="w-[250px] h-[250px] rounded-2xl object-cover border-2 border-white/40 shadow-xl"
+                        />
+                      ) : (
+                        <div className="w-[250px] h-[250px] rounded-2xl bg-gradient-to-br from-[#C0C0C0] to-white/30 flex items-center justify-center text-black font-bold text-2xl flex-shrink-0 border-2 border-white/40">
+                          {testimonios[currentTestimonioIndex].nombre.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Derecha: Contenido y Divisiones */}
+                    <div className="flex-1 flex flex-col h-full">
+                      <div className="flex gap-1 mb-6 justify-center md:justify-start">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            className="w-5 h-5 fill-[#C0C0C0] text-[#C0C0C0] drop-shadow-[0_0_8px_rgba(192,192,192,0.6)]"
+                          />
+                        ))}
                       </div>
-                    )}
-                    
-                    <div className="text-center md:text-left">
-                      <p className="font-bold text-2xl text-white mb-1">{testimonios[currentTestimonioIndex].nombre}</p>
-                      <p className="text-[#C0C0C0] text-lg mb-2">{testimonios[currentTestimonioIndex].ubicacion}</p>
-                      <p className="text-sm text-white font-semibold bg-white/10 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5">
-                        {testimonios[currentTestimonioIndex].modelo}
+                      
+                      <p className="text-xl md:text-2xl text-gray-200 mb-8 italic leading-relaxed font-light">
+                        &ldquo;{testimonios[currentTestimonioIndex].texto}&rdquo;
                       </p>
+                      
+                      <div className="mt-auto pt-6 border-t border-white/10">
+                        <p className="font-bold text-2xl text-white mb-1">
+                          {testimonios[currentTestimonioIndex].nombre}
+                        </p>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                          <p className="text-[#C0C0C0] text-lg">
+                            {testimonios[currentTestimonioIndex].ubicacion}
+                          </p>
+                          <span className="hidden md:block w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                          <p className="text-sm text-white font-semibold bg-white/10 inline-block px-4 py-1.5 rounded-full backdrop-blur-sm border border-white/5">
+                            {testimonios[currentTestimonioIndex].modelo}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </motion.div>
