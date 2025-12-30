@@ -940,20 +940,24 @@ const LandingPage = () => {
                       </button>
                     )}
 
-                    {/* Indicadores de Posición */}
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                      {currentModel.imagenes.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentImageIndex(idx)}
-                          className={`w-2 h-2 rounded-full transition-all ${
-                            idx === currentImageIndex 
-                              ? 'bg-white w-8' 
-                              : 'bg-white/50 hover:bg-white/75'
-                          }`}
-                        />
-                      ))}
-                    </div>
+                {/* Indicadores de Posición / Thumbnails */}
+                {currentModel.imagenes.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90%] px-4 py-2 scrollbar-hide">
+                    {currentModel.imagenes.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`relative flex-shrink-0 w-12 h-12 rounded-md overflow-hidden transition-all border-2 ${
+                          idx === currentImageIndex 
+                            ? 'border-white scale-110 z-10' 
+                            : 'border-transparent opacity-50 hover:opacity-100'
+                        }`}
+                      >
+                        <img src={img} className="w-full h-full object-cover" alt="" />
+                      </button>
+                    ))}
+                  </div>
+                )}
                   </>
                 )}
               </div>
