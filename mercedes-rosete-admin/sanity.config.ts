@@ -9,9 +9,10 @@ export default defineConfig({
   projectId: 'nfhji1ic',
   dataset: 'production',
 
-  // 1. ELIMINAMOS visionTool() de la lista de plugins. 
-  // Esto quita el botón de "Vision" de la parte superior central.
-  plugins: [structureTool()],
+  // BLOQUEO 1: Eliminamos Vision de la lógica del programa
+  plugins: [
+    structureTool(),
+  ],
 
   schema: {
     types: schemaTypes,
@@ -24,31 +25,41 @@ export default defineConfig({
           <>
             <style>
               {`
-                /* OCULTAR MENÚ DERECHO (Perfil y Ayuda) */
+                /* BLOQUEO 2: ELIMINAR VISION DEL CENTRO */
+                /* Ocultamos cualquier enlace o botón que contenga la palabra Vision */
+                a[href*="vision"], 
+                button[aria-label="Vision"],
+                div[role="tablist"] > a:nth-child(2) { 
+                  display: none !important; 
+                }
+
+                /* BLOQUEO 3: LADO DERECHO (Usuario y Ayuda) */
+                /* Ocultamos todo el grupo de herramientas de la derecha */
                 [data-testid="user-menu-button"],
-                [data-testid="help-menu-button"] { 
-                  display: none !important; 
+                button:has(svg[data-sanity-icon="help-circle"]),
+                button:has(svg[data-sanity-icon="cog"]) {
+                  display: none !important;
                 }
                 
-                /* OCULTAR MENÚ IZQUIERDO (El cuadrito morado y Manage Project) */
-                /* Esto evita que al hacer clic en el nombre del proyecto salga el botón de Manage */
-                [data-testid="project-menu-button"] { 
-                  display: none !important; 
-                }
-
-                /* OCULTAR BOTÓN DE VISION (Por si acaso quedara algún rastro visual) */
-                /* Aunque lo quitamos de los plugins, esto asegura que no aparezca el enlace */
-                a[href*="vision"] { 
-                  display: none !important; 
-                }
-
-                /* OCULTAR BARRA DE BÚSQUEDA */
-                [data-testid="search-button"] { 
-                  display: none !important; 
+                /* BLOQUEO 4: LADO IZQUIERDO (Nombre del proyecto y Manage Project) */
+                /* Atacamos directamente al botón que despliega el menú del proyecto */
+                [data-testid="project-menu-button"],
+                button:has(svg[data-sanity-icon="chevron-down"]),
+                header > div:first-child button {
+                  pointer-events: none !important;
+                  cursor: default !important;
                 }
                 
-                /* OPCIONAL: Si quieres quitar el botón de "Drafts" o estado de publicación */
-                /* [data-testid="status-menu-button"] { display: none !important; } */
+                /* Si el botón de arriba no desaparece, ocultamos el ícono de la flecha */
+                /* para que no sientan que es un menú desplegable */
+                [data-testid="project-menu-button"] svg {
+                  display: none !important;
+                }
+
+                /* BLOQUEO 5: BARRA DE BÚSQUEDA */
+                [data-testid="search-button"] {
+                  display: none !important;
+                }
               `}
             </style>
             {props.renderDefault(props)}
