@@ -21,39 +21,50 @@ export default defineConfig({
       layout: (props) => {
         return createElement(Fragment, null, 
           createElement('style', null, `
-            /* 1. CORRECCIÓN DE DISEÑO: ELIMINAR BLOQUEOS DE CAPA */
-            /* Quitamos el div que envolvía todo para que Sanity use el 100% de la pantalla */
+            /* 1. OCULTAR OPCIONES EXTERNAS Y "MANAGE PROJECT" */
+            /* Usamos selectores universales para alcanzar el menú aunque esté en capas flotantes */
             
-            /* 2. OCULTAR OPCIÓN "MANAGE PROJECT" Y OTROS ENLACES EXTERNOS */
-            /* Usamos selectores más agresivos para alcanzar el menú desplegable (que está en un Portal) */
-            a[href*="sanity.io/manage"],
-            a[href*="/manage/project"],
-            [data-testid="user-menu-item-manage-project"],
-            button:has(span:contains("Manage project")),
-            a:has(span:contains("Manage project")) {
-              display: none !important;
-              visibility: hidden !important;
-              height: 0 !important;
-              width: 0 !important;
-              padding: 0 !important;
-              margin: 0 !important;
-              overflow: hidden !important;
-            }
-
-            /* 3. OCULTAR BOTONES INNECESARIOS DE LA BARRA SUPERIOR */
+            /* Ocultar el botón de búsqueda y ayuda en la barra superior */
             [data-testid="search-button"],
             [data-testid="help-menu-button"],
             a[href*="vision"] { 
               display: none !important; 
             }
+
+            /* ESTRATEGIA: OCULTAR TODO EN EL MENÚ DE USUARIO EXCEPTO LO PERMITIDO */
+            /* Intentamos ocultar el item de "Manage project" por múltiples vías */
             
-            /* 4. BLOQUEO DEL MENÚ DE PROYECTO (IZQUIERDA) */
+            /* Por enlace */
+            [role="menu"] a[href*="sanity.io/manage"],
+            [role="menu"] a[href*="/manage/project"],
+            /* Por test ID conocido */
+            [data-testid="user-menu-item-manage-project"],
+            /* Por selector de proximidad al texto (CSS Level 4 - :has) */
+            [role="menuitem"]:has(span:contains("Manage")),
+            [role="menuitem"]:has(div:contains("Manage")),
+            /* Selector general para cualquier enlace de gestión */
+            a[href*="manage.sanity.io"] {
+              display: none !important;
+              visibility: hidden !important;
+              opacity: 0 !important;
+              pointer-events: none !important;
+            }
+
+            /* 2. BLOQUEO DEL MENÚ DE PROYECTO (ARRIBA A LA IZQUIERDA) */
+            /* Bloqueamos el clic para que no se abra el menú de la organización */
             [data-testid="project-menu-button"] {
               pointer-events: none !important;
               cursor: default !important;
             }
             
+            /* Quitamos la flecha visual */
             [data-testid="project-menu-button"] [data-slot="icon"] {
+              display: none !important;
+            }
+
+            /* 3. LIMPIEZA DE INTERFAZ */
+            /* Aseguramos que no haya banners de invitación o gestión */
+            [data-testid="project-invite-banner"] {
               display: none !important;
             }
           `),
