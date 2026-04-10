@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { client, urlFor } from './sanityClient'
+import { normalizeCarFromApi, parseCarsJson, getApiBaseUrl } from './carApi'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Phone, 
@@ -27,50 +27,30 @@ const LandingPage = () => {
     modelo: ''
   })
   const [cars, setCars] = useState([])
-  const [deliveries, setDeliveries] = useState([])
   const [loading, setLoading] = useState(true)
   const [currentTestimonioIndex, setCurrentTestimonioIndex] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const carsQuery = `*[_type == "car"] {
-          _id,
-          Marca,
-          Modelo,
-          Anio,
-          Precio,
-          Kilometraje,
-          Aceleracion,
-          Potencia,
-          Motor,
-          EsNuevo,
-          Descuento,
-          FotoPortada,
-          "Galeria": Galeria[].asset->url
-        }`
-        const deliveriesQuery = `*[_type == "delivery"] {
-          _id,
-          NombreCliente,
-          Ubicacion,
-          ModeloAuto,
-          FotoCliente,
-          Descripcion
-        }`
-        
-        const [carsData, deliveriesData] = await Promise.all([
-          client.fetch(carsQuery),
-          client.fetch(deliveriesQuery)
-        ])
-        
-        console.log("Cars from Sanity:", carsData)
-        console.log("Deliveries from Sanity:", deliveriesData)
-        
-        setCars(carsData)
-        setDeliveries(deliveriesData)
+      const base = getApiBaseUrl()
+      if (!base) {
+        console.error(
+          'Configura NEXT_PUBLIC_API_URL (URL del Dashboard) en .env o en Vercel.'
+        )
         setLoading(false)
+        return
+      }
+      try {
+        const res = await fetch(`${base}/api/cars`)
+        if (!res.ok) {
+          throw new Error(`Error ${res.status} al obtener /api/cars`)
+        }
+        const json = await res.json()
+        const rawList = parseCarsJson(json)
+        setCars(rawList.map(normalizeCarFromApi))
       } catch (error) {
-        console.error("Error fetching data:", error)
+        console.error('Error al cargar vehículos:', error)
+      } finally {
         setLoading(false)
       }
     }
@@ -79,15 +59,18 @@ const LandingPage = () => {
   }, [])
 
   const modelos = cars.filter(car => car.EsNuevo).map(car => ({
-    nombre: `${car.Marca} ${car.Modelo}`,
-    imagen: car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
-    imagenes: [
-      car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
-      ...(car.Galeria || [])
-    ].filter(Boolean),
-    aceleracion: car.Aceleracion || "N/D",
-    potencia: car.Potencia || "N/D",
-    motor: car.Motor || "N/D",
+    id: car.id,
+    nombre: `${car.Marca} ${car.Modelo}`.trim() || 'Mercedes-Benz',
+    imagen: car.FotoPortada || '',
+    imagenes: [car.FotoPortada, ...(car.Galeria || [])].filter(Boolean),
+    aceleracion: car.Aceleracion ?? 'N/D',
+    potencia: car.Potencia ?? 'N/D',
+    motor: car.Motor ?? 'N/D',
+    año: car.Anio != null ? String(car.Anio) : undefined,
+    kilometraje:
+      car.Kilometraje != null
+        ? `${car.Kilometraje.toLocaleString('es-MX')} km`
+        : undefined,
     descuento: car.Descuento,
     precioRaw: car.Precio,
     precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
@@ -97,30 +80,26 @@ const LandingPage = () => {
   }))
 
   const seminuevos = cars.filter(car => !car.EsNuevo).map(car => ({
-    nombre: `${car.Marca} ${car.Modelo}`,
-    año: car.Anio?.toString() || "N/D",
-    imagen: car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
-    imagenes: [
-      car.FotoPortada ? urlFor(car.FotoPortada).url() : '',
-      ...(car.Galeria || [])
-    ].filter(Boolean),
-    kilometraje: car.Kilometraje ? `${car.Kilometraje.toLocaleString()} km` : "0 km",
+    id: car.id,
+    nombre: `${car.Marca} ${car.Modelo}`.trim() || 'Mercedes-Benz',
+    año: car.Anio != null ? String(car.Anio) : 'N/D',
+    imagen: car.FotoPortada || '',
+    imagenes: [car.FotoPortada, ...(car.Galeria || [])].filter(Boolean),
+    aceleracion: car.Aceleracion ?? 'N/D',
+    potencia: car.Potencia ?? 'N/D',
+    kilometraje: car.Kilometraje != null
+      ? `${car.Kilometraje.toLocaleString('es-MX')} km`
+      : '0 km',
     precioRaw: car.Precio,
     precio: car.Precio ? `$${car.Precio.toLocaleString()}` : "Consultar",
     precioConDescuento: car.Precio && car.Descuento > 0 
       ? `$${(car.Precio * (1 - car.Descuento / 100)).toLocaleString()}` 
       : null,
-    motor: car.Motor || "N/D",
+    motor: car.Motor ?? 'N/D',
     descuento: car.Descuento
   }))
 
-  const testimonios = deliveries.map(delivery => ({
-    nombre: delivery.NombreCliente,
-    ubicacion: delivery.Ubicacion || "Riviera Maya",
-    texto: delivery.Descripcion,
-    modelo: delivery.ModeloAuto || "Mercedes-Benz",
-    imagen: delivery.FotoCliente ? urlFor(delivery.FotoCliente).url() : null
-  }))
+  const testimonios = []
 
   // Efecto para el carrusel de testimonios (6 segundos)
   useEffect(() => {
@@ -476,7 +455,7 @@ const LandingPage = () => {
           >
             {modelos.map((modelo, index) => (
               <motion.div
-                key={index}
+                key={modelo.id ?? `nuevo-${index}`}
                 variants={fadeInUp}
                 className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500"
               >
@@ -591,7 +570,7 @@ const LandingPage = () => {
           >
             {seminuevos.map((vehiculo, index) => (
               <motion.div
-                key={index}
+                key={vehiculo.id ?? `semi-${index}`}
                 variants={fadeInUp}
                 className="glass rounded-2xl overflow-hidden group hover:scale-105 transition-transform duration-500"
               >
@@ -980,19 +959,19 @@ const LandingPage = () => {
                   {currentModel.nombre}
                 </h3>
                 <div className="flex flex-wrap gap-4 text-sm md:text-base">
-                  {currentModel.aceleracion && (
+                  {currentModel.aceleracion && currentModel.aceleracion !== 'N/D' && (
                     <span className="text-[#C0C0C0]">
-                      0-100: {currentModel.aceleracion}
+                      0-100 km/h: {currentModel.aceleracion}
                     </span>
                   )}
-                  {currentModel.potencia && (
+                  {currentModel.potencia && currentModel.potencia !== 'N/D' && (
                     <span className="text-[#C0C0C0]">
-                      {currentModel.potencia}
+                      Potencia: {currentModel.potencia}
                     </span>
                   )}
-                  {currentModel.motor && (
+                  {currentModel.motor && currentModel.motor !== 'N/D' && (
                     <span className="text-[#C0C0C0]">
-                      {currentModel.motor}
+                      Motor: {currentModel.motor}
                     </span>
                   )}
                   {currentModel.año && (
