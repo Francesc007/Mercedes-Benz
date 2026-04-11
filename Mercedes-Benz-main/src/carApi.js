@@ -110,13 +110,23 @@ export function normalizeCarFromApi(raw) {
 
 export function parseCarsJson(json) {
   if (Array.isArray(json)) return json
-  if (Array.isArray(json?.data)) return json.data
+  // Respuesta típica: { data: { cars: [...] } }
+  if (Array.isArray(json?.data?.cars)) return json.data.cars
   if (Array.isArray(json?.cars)) return json.cars
+  if (Array.isArray(json?.data)) return json.data
   if (Array.isArray(json?.items)) return json.items
   return []
 }
 
-export function getApiBaseUrl() {
-  const raw = import.meta.env.NEXT_PUBLIC_API_URL || ''
-  return String(raw).replace(/\/$/, '')
+/**
+ * Obtiene vehículos desde `/api/cars` y devuelve objetos normalizados (Marca, Precio, FotoPortada, etc.).
+ */
+export async function fetchCars() {
+  const res = await fetch('/api/cars')
+  if (!res.ok) {
+    throw new Error(`Error ${res.status} al obtener /api/cars`)
+  }
+  const json = await res.json()
+  const rawList = parseCarsJson(json)
+  return rawList.map(normalizeCarFromApi)
 }

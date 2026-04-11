@@ -6,6 +6,15 @@ export default defineConfig({
   plugins: [react()],
   // Permite usar NEXT_PUBLIC_API_URL (misma convención que Next.js / Vercel)
   envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://dashboard-inventario-woad.vercel.app',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
 
 

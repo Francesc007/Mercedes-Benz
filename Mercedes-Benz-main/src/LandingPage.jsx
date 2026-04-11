@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { normalizeCarFromApi, parseCarsJson, getApiBaseUrl } from './carApi'
+import { fetchCars } from './carApi'
+import { trackLandingEvent } from './leadTracking'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Phone, 
@@ -14,6 +15,9 @@ import {
   X,
   ChevronLeft
 } from 'lucide-react'
+
+const WA_PRESET_URL =
+  'https://wa.me/525545229987?text=Hola%20Alex,%20vi%20tu%20landing%20page%20y%20me%20gustaría%20recibir%20información%20sobre%20un%20Mercedes-Benz.'
 
 const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -32,22 +36,9 @@ const LandingPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const base = getApiBaseUrl()
-      if (!base) {
-        console.error(
-          'Configura NEXT_PUBLIC_API_URL (URL del Dashboard) en .env o en Vercel.'
-        )
-        setLoading(false)
-        return
-      }
       try {
-        const res = await fetch(`${base}/api/cars`)
-        if (!res.ok) {
-          throw new Error(`Error ${res.status} al obtener /api/cars`)
-        }
-        const json = await res.json()
-        const rawList = parseCarsJson(json)
-        setCars(rawList.map(normalizeCarFromApi))
+        const list = await fetchCars()
+        setCars(list)
       } catch (error) {
         console.error('Error al cargar vehículos:', error)
       } finally {
@@ -118,11 +109,21 @@ const LandingPage = () => {
     })
   }
 
-  const openModal = (modelo) => {
+  const openModal = (modelo, inventoryList = 'nuevo') => {
     setCurrentModel(modelo)
     setCurrentImageIndex(0)
     setModalOpen(true)
     document.body.style.overflow = 'hidden' // Prevenir scroll del body
+    void trackLandingEvent('car_view', {
+      carId: modelo.id,
+      carLabel: modelo.nombre,
+      metadata: { inventory_list: inventoryList },
+    })
+  }
+
+  const openWhatsAppPreset = (placement) => {
+    void trackLandingEvent('whatsapp_click', { metadata: { placement } })
+    window.open(WA_PRESET_URL, '_blank', 'noopener,noreferrer')
   }
 
   const closeModal = () => {
@@ -209,17 +210,21 @@ const LandingPage = () => {
     }
   ]
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    await trackLandingEvent('form_submit', {
+      nombre: formData.nombre,
+      whatsapp: formData.whatsapp,
+      modeloInteres: formData.modelo,
+    })
     const mensaje = `Hola Alex, soy ${formData.nombre}. Estoy interesado en el ${formData.modelo}. Mi WhatsApp: ${formData.whatsapp}`
     const whatsappUrl = `https://wa.me/525545229987?text=${encodeURIComponent(mensaje)}`
-    window.open(whatsappUrl, '_blank')
-    
-    // Limpiar formulario después de enviar
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer')
+
     setFormData({
       nombre: '',
       whatsapp: '',
-      modelo: ''
+      modelo: '',
     })
   }
 
@@ -461,7 +466,7 @@ const LandingPage = () => {
               >
                 <div 
                   className="relative h-64 overflow-hidden cursor-pointer"
-                  onClick={() => openModal(modelo)}
+                  onClick={() => openModal(modelo, 'nuevo')}
                 >
                   <img 
                     src={modelo.imagen} 
@@ -576,7 +581,7 @@ const LandingPage = () => {
               >
                 <div 
                   className="relative h-64 overflow-hidden cursor-pointer"
-                  onClick={() => openModal(vehiculo)}
+                  onClick={() => openModal(vehiculo, 'seminuevo')}
                 >
                   <img 
                     src={vehiculo.imagen} 
@@ -786,7 +791,11 @@ const LandingPage = () => {
               </p>
               <div className="space-y-4">
                 <a 
-                  href="https://wa.me/525545229987?text=Hola%20Alex,%20vi%20tu%20landing%20page%20y%20me%20gustaría%20recibir%20información%20sobre%20un%20Mercedes-Benz."
+                  href={WA_PRESET_URL}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    openWhatsAppPreset('contact_section')
+                  }}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-4 hover:text-[#C0C0C0] transition-colors"
@@ -842,7 +851,7 @@ const LandingPage = () => {
                   >
                     <option value="" className="bg-white text-black">Selecciona un modelo</option>
                     {cars.map(car => (
-                      <option key={car._id} value={`${car.Marca} ${car.Modelo}`} className="bg-white text-black">
+                      <option key={car.id ?? `${car.Marca}-${car.Modelo}`} value={`${car.Marca} ${car.Modelo}`} className="bg-white text-black">
                         {car.Marca} {car.Modelo}
                       </option>
                     ))}
@@ -998,7 +1007,11 @@ const LandingPage = () => {
 
       {/* Floating WhatsApp Button - Premium Glassmorphism */}
       <motion.a
-        href="https://wa.me/525545229987?text=Hola%20Alex,%20vi%20tu%20landing%20page%20y%20me%20gustaría%20recibir%20información%20sobre%20un%20Mercedes-Benz."
+        href={WA_PRESET_URL}
+        onClick={(e) => {
+          e.preventDefault()
+          openWhatsAppPreset('floating_button')
+        }}
         target="_blank"
         rel="noopener noreferrer"
         initial={{ scale: 0, opacity: 0, y: 20 }}
