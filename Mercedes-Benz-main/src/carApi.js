@@ -122,10 +122,14 @@ export function parseCarsJson(json) {
  * Obtiene vehículos desde `/api/cars` y devuelve objetos normalizados (Marca, Precio, FotoPortada, etc.).
  */
 export async function fetchCars() {
-  const res = await fetch('/api/cars')
+  // Aquí usamos la variable que configuramos en Vercel, o el "/api/cars" si estamos en desarrollo
+  const baseUrl = import.meta.env.VITE_API_URL || ''; 
+  const res = await fetch(`${baseUrl}/api/cars`)
+  
   if (!res.ok) {
-    throw new Error(`Error ${res.status} al obtener /api/cars`)
+    throw new Error(`Error ${res.status} al obtener ${baseUrl}/api/cars`)
   }
+  // ... resto de tu código igual
   const json = await res.json()
   const rawList = parseCarsJson(json)
   return rawList.map(normalizeCarFromApi)
